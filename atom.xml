@@ -4,7 +4,7 @@
   <title><![CDATA[My Octopress Blog]]></title>
   <link href="http://vizZ.github.io/atom.xml" rel="self"/>
   <link href="http://vizZ.github.io/"/>
-  <updated>2014-03-12T23:05:02+01:00</updated>
+  <updated>2014-03-12T23:23:50+01:00</updated>
   <id>http://vizZ.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -12,5 +12,125 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Inspect Your Android Device Networking With Mitmproxy]]></title>
+    <link href="http://vizZ.github.io/blog/2014/01/08/inspect-your-android-device-networking-with-mitmproxy/"/>
+    <updated>2014-01-08T00:00:00+01:00</updated>
+    <id>http://vizZ.github.io/blog/2014/01/08/inspect-your-android-device-networking-with-mitmproxy</id>
+    <content type="html"><![CDATA[<h3>Install and configure mitmproxy</h3>
+
+<p>Install and cofigure <a href="http://brew.sh/">Homebrew</a>:</p>
+
+<pre><code>  ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+  brew update &amp;&amp; brew upgrade 
+</code></pre>
+
+<p>Install mitmproxy:</p>
+
+<pre><code>  brew intall mitmproxy
+</code></pre>
+
+<p>The first time mitmproxy or mitmdump is run, a set of certificate files for the mitmproxy Certificate Authority are created in the config directory (~/.mitmproxy by default), so run mitmproxy:</p>
+
+<pre><code>  mitmproxy -p 8888
+</code></pre>
+
+<p><strong>Note!</strong></p>
+
+<p>When running mitmproxy for the first time, you may encounter an issue:</p>
+
+<pre><code>  &gt; mitmproxy
+  Error: mitmproxy requires a UTF console environment.
+  Set your LANG enviroment variable to something like en_US.UTF-8
+</code></pre>
+
+<p>This is because you might have unset LANG env:</p>
+
+<pre><code>  &gt; locale                                                                                                                                                                                                         
+  LANG=
+  LC_COLLATE="C"
+  LC_CTYPE="C"
+  LC_MESSAGES="C"
+  LC_MONETARY="C"
+  LC_NUMERIC="C"
+  LC_TIME="C"
+  LC_ALL=
+</code></pre>
+
+<p>All you have to do is to add an export to your .zshrc:</p>
+
+<pre><code>  export LC_ALL=en_US.UTF-8  
+  export LANG=en_US.UTF-8
+</code></pre>
+
+<p>Then source your shell configuration:</p>
+
+<pre><code>  source ~/.zshrc
+</code></pre>
+
+<p>Push the mitmproxy certificate to the device with adb:</p>
+
+<pre><code>  adb push ~/.mitmproxy/mitmproxy-ca-cert.cer /sdcard/Downloads
+</code></pre>
+
+<p>On the device, go to the Settings &ndash;> Security &ndash;> Install from storage &ndash;> choose mitmproxy-ca-cert from the dropdown</p>
+
+<h3>Adjust your pc-to-device network configuration (Genymotion)</h3>
+
+<p>Turn off your virtual device and navigate to Genymotion &ndash;> Settings &ndash;> Network &ndash;> Check &ldquo;Use HTTP Proxy&rdquo;</p>
+
+<p>Check the ip of your device (look for vboxnet* entry):</p>
+
+<pre><code>  &gt; ifconfig  
+  lo0: flags=8049&lt;UP,LOOPBACK,RUNNING,MULTICAST&gt; mtu 16384
+    options=3&lt;RXCSUM,TXCSUM&gt;
+    inet6 ::1 prefixlen 128
+    inet 127.0.0.1 netmask 0xff000000
+    inet6 fe80::1%lo0 prefixlen 64 scopeid 0x1
+    nd6 options=1&lt;PERFORMNUD&gt;
+  gif0: flags=8010&lt;POINTOPOINT,MULTICAST&gt; mtu 1280
+  stf0: flags=0&lt;&gt; mtu 1280
+  en0: flags=8863&lt;UP,BROADCAST,SMART,RUNNING,SIMPLEX,MULTICAST&gt; mtu 1500
+    options=10b&lt;RXCSUM,TXCSUM,VLAN_HWTAGGING,AV&gt;
+    ether 10:dd:b1:ea:aa:57
+    nd6 options=1&lt;PERFORMNUD&gt;
+    media: autoselect (none)
+    status: inactive
+  fw0: flags=8863&lt;UP,BROADCAST,SMART,RUNNING,SIMPLEX,MULTICAST&gt; mtu 4078
+    lladdr 44:fb:42:ff:fe:88:91:be
+    nd6 options=1&lt;PERFORMNUD&gt;
+    media: autoselect &lt;full-duplex&gt;
+    status: inactive
+  en1: flags=8863&lt;UP,BROADCAST,SMART,RUNNING,SIMPLEX,MULTICAST&gt; mtu 1500
+    ether a8:bb:cf:0e:1b:e6
+    inet6 fe80::aabb:cfff:fe0e:1be6%en1 prefixlen 64 scopeid 0x6
+    inet 10.70.21.33 netmask 0xffffffc0 broadcast 10.70.21.63
+    nd6 options=1&lt;PERFORMNUD&gt;
+    media: autoselect
+    status: active
+  p2p0: flags=8843&lt;UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST&gt; mtu 2304
+    ether 0a:bb:cf:0e:1b:e6
+    media: autoselect
+    status: inactive
+  en3: flags=8822&lt;BROADCAST,SMART,SIMPLEX,MULTICAST&gt; mtu 1500
+    options=60&lt;TSO4,TSO6&gt;
+    ether d2:00:18:89:1b:e0
+    media: autoselect &lt;full-duplex&gt;
+    status: inactive
+  vboxnet0: flags=8843&lt;UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST&gt; mtu 1500
+    ether 0a:00:27:00:00:00
+    inet 192.168.56.1 netmask 0xffffff00 broadcast 192.168.56.255       
+</code></pre>
+
+<p>In Genymotion&rsquo;s network configuration, set &ldquo;HTTP Proxy&rdquo; to 192.168.56.1 (because of &ldquo;vboxnet0&rdquo;) and &ldquo;Port&rdquo; to 8888 (because of &ldquo;mitmproxy -p 8888&rdquo;) and run the device.</p>
+
+<p><strong>Note!</strong></p>
+
+<p>You can verify the network with Genymotion Configuration App at the Homescreen; &ldquo;IP Management&rdquo; section.</p>
+
+<p>You should see your http/https traffic in mitmproxy. <a href="http://mitmproxy.org/doc/mitmproxy.html">Learn</a> to use it! ;)</p>
+]]></content>
+  </entry>
   
 </feed>
